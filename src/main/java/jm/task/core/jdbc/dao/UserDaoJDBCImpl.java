@@ -20,15 +20,15 @@ public class UserDaoJDBCImpl implements UserDao {
         connection.ifPresent((_connection) -> {
             String query = """
                 CREATE TABLE IF NOT EXISTS users (
-                    id          serial PRIMARY KEY,
-                    name        varchar(50),
-                    lastname    varchar(50),
+                    id          bigserial PRIMARY KEY,
+                    name        text,
+                    lastname    text,
                     age         integer not null
                 )
             """;
 
-            try (PreparedStatement statement = _connection.prepareStatement(query)) {
-                statement.executeUpdate();
+            try (Statement statement = _connection.createStatement()) {
+                statement.executeUpdate(query);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -49,11 +49,12 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void saveUser(String name, String lastName, byte age) {
         connection.ifPresent((_connection) -> {
-            String query = String.format("""
-                INSERT INTO users(name, lastname, age) VALUES('%s', '%s', '%d')
-            """, name, lastName, age);
+            String query = "INSERT INTO users(name, lastname, age) VALUES(?, ?, ?)";
 
             try (PreparedStatement statement = _connection.prepareStatement(query)) {
+                statement.setString(1, name);
+                statement.setString(2, lastName);
+                statement.setInt(3, age);
                 statement.executeUpdate();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -63,11 +64,10 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void removeUserById(long id) {
         connection.ifPresent((_connection) -> {
-            String query = String.format("""
-                DELETE FROM users WHERE id = '%d'
-            """, id);
+            String query = "DELETE FROM users WHERE id = ?";
 
             try (PreparedStatement statement = _connection.prepareStatement(query)) {
+                statement.setLong(1, id);
                 statement.executeUpdate();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
