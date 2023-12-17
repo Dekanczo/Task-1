@@ -15,12 +15,24 @@ public class Util {
     static {
         try {
             Class.forName(DB_DRIVER);
-        }
-        catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
+
     private static Optional<Connection> connection = Optional.empty();
+
+    static {
+        Runnable closeConnection = () -> connection.ifPresent(c -> {
+            try {
+                System.out.println("Closing connection!");
+                c.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        Runtime.getRuntime().addShutdownHook(new Thread(closeConnection));
+    }
 
     public static Optional<Connection> getConnection() {
         if (connection.isEmpty()) {
