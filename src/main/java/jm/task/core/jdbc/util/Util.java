@@ -25,7 +25,6 @@ public class Util {
     static {
         Runnable closeConnection = () -> connection.ifPresent(c -> {
             try {
-                System.out.println("Closing connection!");
                 c.close();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
